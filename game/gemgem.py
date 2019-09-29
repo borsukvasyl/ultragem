@@ -19,20 +19,21 @@
 #                gem uses.
 
 
-import random
-import time
-import pygame
-import sys
 import copy
+import random
+import sys
+import time
+
+import pygame
 from pygame.locals import *
 
-FPS = 30 # frames per second to update the screen
+FPS = 30  # frames per second to update the screen
 WINDOWWIDTH = 800  # width of the program's window, in pixels
-WINDOWHEIGHT = 600 # height in pixels
+WINDOWHEIGHT = 600  # height in pixels
 
-BOARDWIDTH = 8 # how many columns in the board
-BOARDHEIGHT = 8 # how many rows in the board
-GEMIMAGESIZE = 64 # width & height of each space in pixels
+BOARDWIDTH = 8  # how many columns in the board
+BOARDHEIGHT = 8  # how many rows in the board
+GEMIMAGESIZE = 64  # width & height of each space in pixels
 
 # NUMGEMIMAGES is the number of gem types. You will need .png image files named
 # gem0.png, gem1.png, etc. up to gem(N-1).png.
@@ -42,14 +43,14 @@ NUMGEMIMAGES = 7
 # is made. The .wav files are named match0.wav, match1.wav, etc.
 NUMMATCHSOUNDS = 6
 
-MOVERATE = 25 # 1 to 100, larger num means faster animations
-DEDUCTSPEED = 0.8 # reduces score by 1 point every DEDUCTSPEED seconds.
+MOVERATE = 25  # 1 to 100, larger num means faster animations
+DEDUCTSPEED = 0.8  # reduces score by 1 point every DEDUCTSPEED seconds.
 
-HIGHLIGHTCOLOR = (255, 0, 255) # color of the selected gem's border
-BGCOLOR = (170, 190, 255) # background color on the screen
-GRIDCOLOR = (0, 0, 255) # color of the game board
-GAMEOVERCOLOR = (255, 100, 100) # color of the "Game over" text.
-GAMEOVERBGCOLOR = (0, 0, 0) # background color of the "Game over" text.
+HIGHLIGHTCOLOR = (255, 0, 255)  # color of the selected gem's border
+BGCOLOR = (170, 190, 255)  # background color on the screen
+GRIDCOLOR = (0, 0, 255)  # color of the game board
+GAMEOVERCOLOR = (255, 100, 100)  # color of the "Game over" text.
+GAMEOVERBGCOLOR = (0, 0, 0)  # background color of the "Game over" text.
 SCORECOLOR = (85, 65, 0)
 
 # The amount of space to the sides of the board to the edge of the window is
@@ -64,10 +65,11 @@ RIGHT = 6
 DOWN = 2
 LEFT = 4
 
-EMPTY_SPACE = -1 # an arbitrary, nonnegative value
-ROWABOVEBOARD = 'row above board' # an arbitrary, noninteger value
+EMPTY_SPACE = -1  # an arbitrary, nonnegative value
+ROWABOVEBOARD = 'row above board'  # an arbitrary, noninteger value
 
-score = 0 # global variable for the score
+score = 0  # global variable for the score
+
 
 def main():
     global FPSCLOCK, WINDOWSURF, GEMIMAGES, GAMESOUNDS, BASICFONT, BOARDRECTS, score
@@ -82,7 +84,7 @@ def main():
 
     # Load the images
     GEMIMAGES = []
-    for i in range(1,NUMGEMIMAGES+1):
+    for i in range(1, NUMGEMIMAGES + 1):
         gemImage = pygame.image.load('gem%s.png' % i)
         if gemImage.get_size() != (GEMIMAGESIZE, GEMIMAGESIZE):
             gemImage = pygame.transform.smoothscale(gemImage, (GEMIMAGESIZE, GEMIMAGESIZE))
@@ -147,9 +149,9 @@ def runGame():
                     firstSelectedGem = checkForGemClick((lastMouseDownX, lastMouseDownY))
                     mouseOverSpace = checkForGemClick(event.pos)
                     if mouseOverSpace and (mouseOverSpace[0] == firstSelectedGem[0] + 1 or \
-                                       mouseOverSpace[0] == firstSelectedGem[0] - 1 or \
-                                       mouseOverSpace[1] == firstSelectedGem[1] + 1 or \
-                                       mouseOverSpace[1] == firstSelectedGem[1] - 1):
+                                           mouseOverSpace[0] == firstSelectedGem[0] - 1 or \
+                                           mouseOverSpace[1] == firstSelectedGem[1] + 1 or \
+                                           mouseOverSpace[1] == firstSelectedGem[1] - 1):
                         clickedSpace = mouseOverSpace
 
                     if not firstSelectedGem or not mouseOverSpace:
@@ -166,7 +168,7 @@ def runGame():
             # Two gems have been selected. Swap the gems.
             firstSwappingGem, secondSwappingGem = getSwappingGems(mainBoard, firstSelectedGem, clickedSpace)
             if firstSwappingGem == None and secondSwappingGem == None:
-                firstSelectedGem = None # Deselect the first gem.
+                firstSelectedGem = None  # Deselect the first gem.
                 continue
 
             # Show the swap animation on the screen.
@@ -218,7 +220,8 @@ def runGame():
             highlightSpace(firstSelectedGem[0], firstSelectedGem[1])
         if isGameOver:
             if clickContinueTextSurf == None:
-                clickContinueTextSurf = BASICFONT.render('Final Score: %s (Click to continue)' % (score), 1, GAMEOVERCOLOR, GAMEOVERBGCOLOR)
+                clickContinueTextSurf = BASICFONT.render('Final Score: %s (Click to continue)' % (score), 1,
+                                                         GAMEOVERCOLOR, GAMEOVERBGCOLOR)
                 clickContinueTextRect = clickContinueTextSurf.get_rect()
                 clickContinueTextRect.center = int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2)
             WINDOWSURF.blit(clickContinueTextSurf, clickContinueTextRect)
@@ -268,21 +271,21 @@ def canMakeMove(board):
     made on it. Otherwise return False."""
     for x in range(BOARDWIDTH):
         for y in range(BOARDHEIGHT):
-            oneOffPatterns = (((0,1), (1,0), (2,0)),
-                              ((0,1), (1,1), (2,0)),
-                              ((0,0), (1,1), (2,0)),
-                              ((0,1), (1,0), (2,1)),
-                              ((0,0), (1,0), (2,1)),
-                              ((0,1), (1,1), (2,0)),
-                              ((0,0), (0,2), (0,3)),
-                              ((0,0), (0,1), (0,3)))
+            oneOffPatterns = (((0, 1), (1, 0), (2, 0)),
+                              ((0, 1), (1, 1), (2, 0)),
+                              ((0, 0), (1, 1), (2, 0)),
+                              ((0, 1), (1, 0), (2, 1)),
+                              ((0, 0), (1, 0), (2, 1)),
+                              ((0, 1), (1, 1), (2, 0)),
+                              ((0, 0), (0, 2), (0, 3)),
+                              ((0, 0), (0, 1), (0, 3)))
             for pat in oneOffPatterns:
-                if (getGemAt(board, x+pat[0][0], y+pat[0][1]) == \
-                    getGemAt(board, x+pat[1][0], y+pat[1][1]) == \
-                    getGemAt(board, x+pat[2][0], y+pat[2][1]) != None) or \
-                   (getGemAt(board, x+pat[0][1], y+pat[0][0]) == \
-                    getGemAt(board, x+pat[1][1], y+pat[1][0]) == \
-                    getGemAt(board, x+pat[2][1], y+pat[2][0]) != None):
+                if (getGemAt(board, x + pat[0][0], y + pat[0][1]) == \
+                    getGemAt(board, x + pat[1][0], y + pat[1][1]) == \
+                    getGemAt(board, x + pat[2][0], y + pat[2][1]) != None) or \
+                        (getGemAt(board, x + pat[0][1], y + pat[0][0]) == \
+                         getGemAt(board, x + pat[1][1], y + pat[1][0]) == \
+                         getGemAt(board, x + pat[2][1], y + pat[2][0]) != None):
                     return True
     return False
 
@@ -308,7 +311,7 @@ def drawMovingGem(gem, progress):
 
     pixelx = XMARGIN + (basex * GEMIMAGESIZE)
     pixely = YMARGIN + (basey * GEMIMAGESIZE)
-    r = pygame.Rect( (pixelx + movex, pixely + movey, GEMIMAGESIZE, GEMIMAGESIZE) )
+    r = pygame.Rect((pixelx + movex, pixely + movey, GEMIMAGESIZE, GEMIMAGESIZE))
     WINDOWSURF.blit(GEMIMAGES[gem['imageNum']], r)
 
 
@@ -317,13 +320,13 @@ def swapGems(board, x, y, direction):
         board[x][y] = EMPTY_SPACE
     else:
         if direction == UP:
-            board[x][y], board[x][y-1] = board[x][y-1], board[x][y]
+            board[x][y], board[x][y - 1] = board[x][y - 1], board[x][y]
         elif direction == RIGHT:
-            board[x][y], board[x+1][y] = board[x+1][y], board[x][y]
+            board[x][y], board[x + 1][y] = board[x + 1][y], board[x][y]
         elif direction == DOWN:
-            board[x][y], board[x][y+1] = board[x][y+1], board[x][y]
+            board[x][y], board[x][y + 1] = board[x][y + 1], board[x][y]
         elif direction == LEFT:
-            board[x][y], board[x-1][y] = board[x-1][y], board[x][y]
+            board[x][y], board[x - 1][y] = board[x - 1][y], board[x][y]
 
 
 def pullDownAllGems(board):
@@ -355,7 +358,7 @@ def getDropSlots(board):
         dropSlots.append([])
 
     for x in range(BOARDWIDTH):
-        for y in range(BOARDHEIGHT-1, -1, -1):
+        for y in range(BOARDHEIGHT - 1, -1, -1):
             if boardCopy[x][y] == EMPTY_SPACE:
                 possibleGems = list(range(len(GEMIMAGES)))
                 for offsetX, offsetY in ((0, -1), (1, 0), (0, 1), (-1, 0)):
@@ -380,7 +383,8 @@ def findMatchingGems(board):
     for x in range(BOARDWIDTH):
         for y in range(BOARDHEIGHT):
             # look for horizontal matches
-            if getGemAt(boardCopy, x, y) == getGemAt(boardCopy, x + 1, y) == getGemAt(boardCopy, x + 2, y) and getGemAt(boardCopy, x, y) != EMPTY_SPACE:
+            if getGemAt(boardCopy, x, y) == getGemAt(boardCopy, x + 1, y) == getGemAt(boardCopy, x + 2, y) and getGemAt(
+                    boardCopy, x, y) != EMPTY_SPACE:
                 targetGem = boardCopy[x][y]
                 offset = 0
                 removeSet = []
@@ -392,7 +396,8 @@ def findMatchingGems(board):
                 gemsToRemove.append(removeSet)
 
             # look for vertical matches
-            if getGemAt(boardCopy, x, y) == getGemAt(boardCopy, x, y + 1) == getGemAt(boardCopy, x, y + 2) and getGemAt(boardCopy, x, y) != EMPTY_SPACE:
+            if getGemAt(boardCopy, x, y) == getGemAt(boardCopy, x, y + 1) == getGemAt(boardCopy, x, y + 2) and getGemAt(
+                    boardCopy, x, y) != EMPTY_SPACE:
                 targetGem = boardCopy[x][y]
                 offset = 0
                 removeSet = []
@@ -418,13 +423,13 @@ def getDroppingGems(board):
         for y in range(BOARDHEIGHT - 2, -1, -1):
             if boardCopy[x][y + 1] == EMPTY_SPACE and boardCopy[x][y] != EMPTY_SPACE:
                 # This space drops if it is not empty but the space below it is empty
-                droppingGems.append( {'imageNum': boardCopy[x][y], 'x': x, 'y': y, 'direction': DOWN} )
-                boardCopy[x][y] = EMPTY_SPACE # this space will become empty if it drops.
+                droppingGems.append({'imageNum': boardCopy[x][y], 'x': x, 'y': y, 'direction': DOWN})
+                boardCopy[x][y] = EMPTY_SPACE  # this space will become empty if it drops.
     return droppingGems
 
 
 def animateMovingGems(board, gems, pointsText):
-    progress = 0 # progress at 0 represents beginning, progress at 100 represents finish.
+    progress = 0  # progress at 0 represents beginning, progress at 100 represents finish.
     while progress < 100:
         WINDOWSURF.fill(BGCOLOR)
         drawBoard(board)
@@ -460,7 +465,7 @@ def moveGems(board, movingGems):
                 movey = -1
             board[gem['x'] + movex][gem['y'] + movey] = gem['imageNum']
         else:
-            board[gem['x']][0] = gem['imageNum'] # ignore 'direction', just move to top row
+            board[gem['x']][0] = gem['imageNum']  # ignore 'direction', just move to top row
 
 
 def fillBoardAndAnimate(board, points=None):
@@ -494,12 +499,13 @@ def checkForGemClick(pos):
     for x in range(BOARDWIDTH):
         for y in range(BOARDHEIGHT):
             if BOARDRECTS[x][y].collidepoint(pos[0], pos[1]):
-                return (x, y) # Return board x and y where the click occurred.
-    return None # Click was not on the board.
+                return (x, y)  # Return board x and y where the click occurred.
+    return None  # Click was not on the board.
 
 
 def drawBoard(board):
-    pygame.draw.rect(WINDOWSURF, BGCOLOR, (XMARGIN, YMARGIN - GEMIMAGESIZE, GEMIMAGESIZE * BOARDWIDTH, GEMIMAGESIZE * (BOARDHEIGHT+1)), 0)
+    pygame.draw.rect(WINDOWSURF, BGCOLOR,
+                     (XMARGIN, YMARGIN - GEMIMAGESIZE, GEMIMAGESIZE * BOARDWIDTH, GEMIMAGESIZE * (BOARDHEIGHT + 1)), 0)
     for x in range(BOARDWIDTH):
         for y in range(BOARDHEIGHT):
             pygame.draw.rect(WINDOWSURF, GRIDCOLOR, BOARDRECTS[x][y], 1)
@@ -520,7 +526,7 @@ def getBoardCopyMinusGems(board, gems):
 
 
 def drawScore():
-    scoreImg = BASICFONT.render(str(score), 1, SCORECOLOR) # score is a global variable
+    scoreImg = BASICFONT.render(str(score), 1, SCORECOLOR)  # score is a global variable
     scoreRect = scoreImg.get_rect()
     scoreRect.bottomleft = (10, WINDOWHEIGHT - 10)
     WINDOWSURF.blit(scoreImg, scoreRect)
