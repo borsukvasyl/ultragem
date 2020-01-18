@@ -19,18 +19,12 @@ if __name__ == '__main__':
     time.sleep(10)
     interface = GameInterface()
     while True:
-        # for img in interface.get_field():
-        #     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        #     cv2.imshow("image", img)
-        #     if cv2.waitKey(0) & 0xFF == 27:
-        #         cv2.destroyAllWindows()
-        # break
         img = interface.crop_field()
-        # field = interface.get_field()
-        #
-        # print("=" * 30)
-        # print(field)
-        # print("=" * 30)
+        field = interface.get_field()
+
+        print("=" * 30)
+        print(field)
+        print("=" * 30)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         cv2.imshow("image", img)
         if cv2.waitKey(0) & 0xFF == 27:
