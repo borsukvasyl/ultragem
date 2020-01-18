@@ -5,8 +5,7 @@ import cv2
 import numpy as np
 import pygame
 from math import ceil
-
-from game.ultragem import BGCOLOR, GRIDCOLOR
+from patchify import patchify
 
 
 class GameInterface(object):
@@ -24,22 +23,27 @@ class GameInterface(object):
         start_w, start_h = self.field_bbox[:2]
         w, h = self.bbox_shape
 
-        boxes = []
-        field = np.zeros(self.num_boxes, int)
+        field = [[None for _ in range(self.num_boxes[1])] for _ in range(self.num_boxes[0])]
         for i in range(self.num_boxes[0]):
             for j in range(self.num_boxes[1]):
                 x1, y1 = i * w, j * h
                 x2, y2 = (i + 1) * w, (j + 1) * h
                 box = img[start_h + y1:start_h + y2, start_w + x1:start_w + x2]
-                field[j, i] = self._get_label(box)
-                boxes.append(box)
-        cv2.imshow("image", cv2.cvtColor(np.hstack(boxes), cv2.COLOR_RGB2BGR))
-        if cv2.waitKey(0) & 0xFF == 27:
-            cv2.destroyAllWindows()
+                field[j][i] = self._get_label(box)
         return field
 
-    def interact(self, x, y):
-        pass
+    def interact(self, pair1, pair2):
+        pos1 = (self.field_bbox[0] + pair1[1] * self.bbox_shape[0] + self.bbox_shape[0] // 2,
+                self.field_bbox[1] + pair1[0] * self.bbox_shape[1] + self.bbox_shape[1] // 2)
+        pos2 = (self.field_bbox[0] + pair2[1] * self.bbox_shape[0] + self.bbox_shape[0] // 2,
+                self.field_bbox[1] + pair2[0] * self.bbox_shape[1] + self.bbox_shape[1] // 2)
+
+        # with open("koko.txt", "a") as f:
+        #     f.write(" ".join(map(str, pos1)) + "    " + " ".join(map(str, pos2)) + "\n")
+        pygame.event.post(pygame.event.Event(pygame.locals.MOUSEBUTTONDOWN, {"pos": pos1}))
+        pygame.event.post(pygame.event.Event(pygame.locals.MOUSEBUTTONUP, {"pos": pos1}))
+        pygame.event.post(pygame.event.Event(pygame.locals.MOUSEBUTTONDOWN, {"pos": pos2}))
+        pygame.event.post(pygame.event.Event(pygame.locals.MOUSEBUTTONUP, {"pos": pos1}))
 
     def crop_field(self):
         img = self.read_screen()
@@ -51,9 +55,12 @@ class GameInterface(object):
         return img
 
     def _get_label(self, img):
-        emb = img[~(np.all(img == BGCOLOR, axis=-1) | np.all(img == GRIDCOLOR, axis=-1))].mean(0)
-        dist = np.sqrt(np.sum((emb - self.embs) ** 2, axis=1))
-        return dist.argmin()
+        parts_per_side, resize, padding = self.embs['parts_per_side'], self.embs['padding'], self.embs['resize_shape']
+        emb = self.get_emb(img, parts_per_side, resize, padding)
+        cell_embs = np.array([e['emb'] for e in self.embs['embs']])
+        result = (cell_embs - emb[None, :])
+        idx = np.argmin(np.sum(np.abs(result), axis=1))
+        return self.embs['embs'][idx]
 
     def _init(self):
         img = self.read_screen()
@@ -86,10 +93,48 @@ class GameInterface(object):
         return ranges
 
     @staticmethod
+    def read_cell(img_path):
+        img = cv2.imread(img_path, -1)
+        mask = (img[:, :, 3] > 100.)
+        img[:, :, 0][~mask] = 252.
+        img[:, :, 1][~mask] = 188.
+        img[:, :, 2][~mask] = 159.
+        img = img[:, :, :3]
+        return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    @staticmethod
+    def get_emb(img, parts_per_side, padding, resize_shape):
+        if img.shape[0] != resize_shape:
+            img = cv2.resize(img, (resize_shape, resize_shape))
+        img = img[padding:-padding, padding:-padding, :]
+        part_size = img.shape[0] // parts_per_side
+        patches = patchify(img, (part_size, part_size, 3), step=part_size).reshape(-1, part_size, part_size, 3)
+        return np.mean(patches, axis=(1, 2)).reshape(-1)
+
+    @staticmethod
+    def get_analytics(img_path, parts_per_side, padding, resize_shape):
+        img = GameInterface.read_cell(img_path)
+        emb = GameInterface.get_emb(img, parts_per_side, padding, resize_shape)
+        splitted = os.path.basename(img_path).split('-')
+        cell_id, attr = splitted[1], splitted[2].split('.')[0]
+        return cell_id, attr, emb
+
+    @staticmethod
     def _read_images():
-        res = []
-        for i, file_path in enumerate(glob.glob("{}/gem[0-9].png".format(GameInterface.GRAPHICS_ROOT))):
-            img = cv2.imread(file_path, cv2.IMREAD_UNCHANGED)
-            img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGBA)
-            res.append(img[img[..., -1] == 0][..., :-1].mean(0))
-        return np.vstack(res)
+        res = {
+            'parts_per_side': 3,
+            'padding': 2,
+            'resize_shape': 32,
+            'embs': list()
+        }
+        img_paths = glob.glob("{}/combN*".format(GameInterface.GRAPHICS_ROOT))
+        for img_path in img_paths:
+            cell_id, attr, emb = GameInterface.get_analytics(
+                img_path, res["parts_per_side"], res["padding"], res["resize_shape"])
+            res["embs"].append({
+                'cell_id': cell_id,
+                'attr': attr,
+                'emb': emb,
+                'img_path': img_path
+            })
+        return res

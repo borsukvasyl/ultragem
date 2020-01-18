@@ -763,6 +763,7 @@ class UltraGemGame(object):
         # See if the mouse click was on the board
         for x in range(self.BOARDWIDTH):
             for y in range(self.BOARDHEIGHT):
+                # print("DEUBG POS:", pos)
                 if self.BOARDRECTS[x][y].collidepoint(pos[0], pos[1]):
                     return (x, y)  # Return board x and y where the click occurred.
         return None  # Click was not on the board.
@@ -906,6 +907,7 @@ My last moves were:
                     if isGameOver:
                         return
 
+                    # print("DEBUG UP:", event.pos)
                     if event.pos == (lastMouseDownX, lastMouseDownY):
                         # This is a mouse click.
                         clickedSpace = self.checkForGemClick(event.pos)
@@ -925,6 +927,7 @@ My last moves were:
                             firstSelectedGem = None
                             mouseOverSpace = None
                 if event.type == MOUSEBUTTONDOWN:
+                    # print("DEBUG DOWN:", event.pos)
                     lastMouseDownX, lastMouseDownY = event.pos
 
             # Check if this is the first or second gem to be clicked.

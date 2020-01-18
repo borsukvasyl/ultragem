@@ -1,8 +1,7 @@
 import threading
 import time
 
-import cv2
-
+from bot.Bot import Bot
 from bot.ScreenReader import GameInterface
 from game.ultragem import UltraGemGame
 
@@ -16,18 +15,25 @@ if __name__ == '__main__':
     game_thread = threading.Thread(target=run_game)
     game_thread.start()
 
-    time.sleep(10)
+    time.sleep(4)  # wait init
     interface = GameInterface()
+    bot = Bot()
+    last_img = interface.read_screen()
     while True:
-        img = interface.crop_field()
-        field = interface.get_field()
-
-        print("=" * 30)
-        print(field)
-        print("=" * 30)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        cv2.imshow("image", img)
-        if cv2.waitKey(0) & 0xFF == 27:
-            cv2.destroyAllWindows()
-        break
+        img = interface.read_screen()
+        if (img == last_img).all():
+            field = interface.get_field()
+            pair1, pair2, score = bot.get_best_move(field)
+            # ####
+            # with open("koko.txt", "w") as f:
+            #     for i in field:
+            #         for j in i:
+            #             f.write(j["cell_id"])
+            #             f.write(" ")
+            #         f.write("\n")
+            #     f.write(" ".join(map(str, pair1)) + "    " + " ".join(map(str, pair2)) + "\n")
+            # ####
+            interface.interact(pair1, pair2)
+        time.sleep(1)
+        last_img = img
     game_thread.join()
